@@ -13,7 +13,7 @@ export default new Vuex.Store({
     // 修改token
     updateUser (state, payload) {
       state.user = payload.user // 载荷数据给state
-      // 存入本地缓存
+      // 最新的数据存入本地缓存
       auth.setUser(payload.user)
     },
     // 删除token
