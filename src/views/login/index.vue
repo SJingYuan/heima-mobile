@@ -28,6 +28,9 @@
 </template>
 
 <script>
+// import * as user from '../../api/user'
+import { login } from '../../api/user'
+import { mapMutations } from 'vuex'
 export default {
   data () {
     return {
@@ -42,6 +45,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(['updateUser']),
     // 检查手机号
     checkMobile () {
       // 判断是否为空
@@ -70,9 +74,17 @@ export default {
       this.errorMessage.code = ''
       return true
     },
-    login () {
+    async login () {
       if (this.checkMobile() && this.checkCode()) {
-
+        try {
+          const result = await login(this.loginForm)
+          this.updateUser({ user: result })
+          const { redirectUrl } = this.$route.query
+          // 有值跳转redirectUrl 没值跳转 /
+          this.$router.push(redirectUrl || '/')
+        } catch (error) {
+          this.$notify({ message: '手机号或验证码错误', duration: 700 })
+        }
       }
     }
   }
