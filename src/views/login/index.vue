@@ -75,7 +75,9 @@ export default {
       return true
     },
     async login () {
-      if (this.checkMobile() && this.checkCode()) {
+      const valMobile = this.checkMobile()
+      const valCode = this.checkCode()
+      if (valMobile && valCode) {
         try {
           const result = await login(this.loginForm)
           this.updateUser({ user: result })
@@ -83,7 +85,7 @@ export default {
           // 有值跳转redirectUrl 没值跳转 /
           this.$router.push(redirectUrl || '/')
         } catch (error) {
-          this.$notify({ message: '手机号或验证码错误', duration: 700 })
+          this.$snotify({ message: '手机号或验证码错误' })
         }
       }
     }
