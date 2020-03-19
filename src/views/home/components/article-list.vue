@@ -10,7 +10,7 @@
         @load="onLoad"
       >
         <van-cell-group>
-          <van-cell v-for="item in articles" :key="item">
+          <van-cell v-for="item in articles" :key="item.art_id">
             <!-- 列表 -->
             <!-- 三张图 -->
             <div class="article_item">
@@ -44,6 +44,7 @@
 </template>
 
 <script>
+import { getArticle } from '@/api/articles'
 export default {
   name: 'article-list',
   data () {
@@ -52,23 +53,42 @@ export default {
       downLoading: false, // 下拉加载
       upLoading: false, // 是否上拉加载数据
       finished: false, // 加载是否完成
-      articles: []
+      articles: [], // 文章列表
+      timestamp: null // 历史时间戳
+    }
+  },
+  props: {
+    channel_id: {
+      required: true, // 要求改props必须传
+      type: Number, // 必须传数字类型
+      default: null // 默认值
     }
   },
   methods: {
     // 上拉加载
-    onLoad () {
-      if (this.articles.length > 50) {
-        this.finished = true
-      } else {
-        const arr = Array.from(
-          Array(15),
-          (value, index) => this.articles.length + index + 1
-        )
-        this.articles.push(...arr)
-        this.upLoading = false
-      }
+    async onLoad () {
+      // if (this.articles.length > 50) {
+      //   this.finished = true
+      // } else {
+      //   const arr = Array.from(
+      //     Array(15),
+      //     (value, index) => this.articles.length + index + 1
+      //   )
+      //   this.articles.push(...arr)
+      //   this.upLoading = false
+      // }
       // setTimeout(() => (this.finished = true), 1000)
+      const data = await getArticle({
+        channel_id: this.channel_id,
+        timestamp: this.timestamp || Date.now()
+      })
+      this.articles.push(data.results) // 数据尾部追加
+      this.upLoading = false
+      if (data.pre_timestamp) {
+        this.timestamp = data.pre_timestamp
+      } else {
+        this.finished = true
+      }
     },
     // 下拉刷新
     onRefresh () {
