@@ -91,13 +91,34 @@ export default {
       }
     },
     // 下拉刷新
-    onRefresh () {
-      setTimeout(() => {
-        const arr = Array.from(Array(2), (value, index) => '追加' + index + 1)
-        this.articles.unshift(...arr)
-        this.downLoading = false
-        this.successText = `更新了${arr.length}条数据`
-      }, 1000)
+    async  onRefresh () {
+      // 发送最新的时间戳
+      const data = await getArticle({
+        channel_id: this.channel_id,
+        timestamp: Date.now()// 时间戳
+      })
+      // 手动关闭下拉刷新状态
+      this.downLoading = false
+      // 判断最新的时间戳能不能换来数据，能就替换数据。不能就提示没更新
+      if (data.results.length) {
+        // 有返回数据，将整个articles替换
+        this.articles = data.results
+        if (data.pre_timestamp) {
+          // 下拉刷新获取新数据，又有历史时间戳
+          this.finished = false // 重新换醒finshed
+          this.timestamp = data.pre_timestamp // 记下历史时间戳
+        }
+        this.successText = `更让新了${data.results.length}条数据`
+      } else {
+        // 换不来提示
+        this.successText = '当前已经是最新数据'
+      }
+      // setTimeout(() => {
+      //   const arr = Array.from(Array(2), (value, index) => '追加' + index + 1)
+      //   this.articles.unshift(...arr)
+      //   this.downLoading = false
+      //   this.successText = `更新了${arr.length}条数据`
+      // }, 1000)
     }
   }
 }
