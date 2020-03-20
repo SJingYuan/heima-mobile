@@ -18,19 +18,19 @@
               <h3 class="van-ellipsis">{{item.title}}</h3>
               <!-- 三图 -->
               <div class="img_box" v-if="item.cover.type===3">
-                <van-image class="w33" fit="cover" :src="item.cover.images[0]" />
-                <van-image class="w33" fit="cover" :src="item.cover.images[1]" />
-                <van-image class="w33" fit="cover" :src="item.cover.images[2]" />
+                <van-image lazy-load class="w33" fit="cover" :src="item.cover.images[0]" />
+                <van-image lazy-load class="w33" fit="cover" :src="item.cover.images[1]" />
+                <van-image lazy-load class="w33" fit="cover" :src="item.cover.images[2]" />
               </div>
               <!-- 单图 -->
               <div class="img_box" v-if="item.cover.type===1">
-                <van-image class="w100" fit="cover" :src="item.cover.images[0]" />
+                <van-image lazy-load class="w100" fit="cover" :src="item.cover.images[0]" />
               </div>
               <div class="info_box">
                 <!-- 作者信息 -->
                 <span>{{item.aut_name}}</span>
                 <span>{{ item.comm_count }}评论</span>
-                <span>{{ item.pubdate }}</span>
+                <span>{{ item.pubdate | relTime }}</span>
                 <span class="close">
                   <van-icon name="cross"></van-icon>
                 </span>
@@ -78,6 +78,7 @@ export default {
       //   this.upLoading = false
       // }
       // setTimeout(() => (this.finished = true), 1000)
+      await this.$sleep() // 人为控制请求时间
       const data = await getArticle({
         channel_id: this.channel_id,
         timestamp: this.timestamp || Date.now()
@@ -91,11 +92,12 @@ export default {
       }
     },
     // 下拉刷新
-    async  onRefresh () {
+    async onRefresh () {
+      await this.$sleep() // 人为控制请求时间
       // 发送最新的时间戳
       const data = await getArticle({
         channel_id: this.channel_id,
-        timestamp: Date.now()// 时间戳
+        timestamp: Date.now() // 时间戳
       })
       // 手动关闭下拉刷新状态
       this.downLoading = false
