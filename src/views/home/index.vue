@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <van-tabs>
+    <van-tabs v-model="activeIndex">
       <van-tab :title="item.name" v-for="item in channels" :key="item.id">
         <!-- 这里注意 这个div设置了滚动条 目的是 给后面做 阅读记忆 留下伏笔 -->
         <!-- 阅读记忆 => 看文章看到一半 滑到中部 去了别的页面 当你回来时 文章还在你看的位置 -->
@@ -9,32 +9,68 @@
             <van-cell title="标题" value="内容" v-for="item in 20" :key="item"></van-cell>
           </van-cell-group>
         </div> -->
-        <ArticleList :channel_id="item.id"></ArticleList>
+        <ArticleList @showMoreAction="openMoreAction" :channel_id="item.id"></ArticleList>
       </van-tab>
     </van-tabs>
     <span class="bar_btn">
       <van-icon name="wap-nav" />
     </span>
+    <van-popup :style="{ width: '80%' }" v-model="showMoreAction">
+      <moreAction @disLike="dislikeArticle"></moreAction>
+    </van-popup>
   </div>
 </template>
 
 <script>
 import ArticleList from './components/article-list'
 import { getMyChannels } from '../../api/channels'
+import moreAction from './components/moreAction'
+import { disLikeArticle } from '@/api/articles'
+import eventbus from '../../utils/eventbus' // 公共事件處理器
 export default {
   name: 'home',
   components: {
-    ArticleList
+    ArticleList,
+    moreAction
   },
   data () {
     return {
-      channels: [] // 接收频道数据
+      channels: [], // 接收频道数据
+      showMoreAction: false, // 控制反馈组件显示隐藏
+      articleId: null, // 接受点击的文章id
+      activeIndex: null
     }
   },
   methods: {
+    openMoreAction (artId) {
+      this.showMoreAction = true
+      this.articleId = artId
+    },
     async  getMyChannels () {
       const data = await getMyChannels() // 接收结果
       this.channels = data.channels // 赋值给data的channels
+    },
+    // 对文章不感兴趣
+    async dislikeArticle () {
+      // 调用不感兴趣的文章接口
+      try {
+        await disLikeArticle({
+          target: this.articleId // 不感兴趣的id
+        })
+        // await下方的逻辑 是 resolve(成功)之后 的
+        this.$snotify({
+          type: 'success',
+          message: '操作成功'
+        })
+
+        eventbus.$emit('delArtiles', this.articleId, this.channels[this.activeIndex].id)
+        this.showMoreAction = false
+      } catch (error) {
+        // 默认是红色
+        this.$snotify({
+          message: '操作失败'
+        })
+      }
     }
   },
   created () {

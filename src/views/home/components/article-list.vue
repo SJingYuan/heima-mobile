@@ -31,7 +31,7 @@
                 <span>{{item.aut_name}}</span>
                 <span>{{ item.comm_count }}评论</span>
                 <span>{{ item.pubdate | relTime }}</span>
-                <span class="close">
+                <span @click="$emit('showMoreAction',item.art_id)" class="close" v-if="user.token">
                   <van-icon name="cross"></van-icon>
                 </span>
               </div>
@@ -45,7 +45,31 @@
 
 <script>
 import { getArticle } from '@/api/articles'
+import { mapState } from 'vuex'
+import eventBus from '@/utils/eventbus'
 export default {
+  // 初始化函数
+  created () {
+    eventBus.$on('delArtiles', (artId, channelId) => {
+      // 每个组件实例都会触发
+      // 判断传递过来的频道是否等于自身的频道
+      if (this.channel_id === channelId) {
+        // 说明当前这个article-list实例就是我们要删除数据的实例
+        const index = this.articles.findIndex(item => item.art_id.toString() === artId) // 通过id查询对应文章数据的下标
+        if (index > -1) {
+          // 从零开始大于负一
+          this.articles.splice(index, 1) // 删除对应下标的数据
+        }
+        // 数据删光自动触发onload
+        if (this.articles.length === 0) {
+          this.onLoad() // 手动触发onload 给页面加数据
+        }
+      }
+    })
+  },
+  computed: {
+    ...mapState(['user']) // 映射到计算属性
+  },
   name: 'article-list',
   data () {
     return {
