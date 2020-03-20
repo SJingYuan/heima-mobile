@@ -53,7 +53,7 @@ export default {
     eventBus.$on('delArtiles', (artId, channelId) => {
       // 每个组件实例都会触发
       // 判断传递过来的频道是否等于自身的频道
-      if (this.channel_id === channelId) {
+      if (channelId === this.channel_id) {
         // 说明当前这个article-list实例就是我们要删除数据的实例
         const index = this.articles.findIndex(item => item.art_id.toString() === artId) // 通过id查询对应文章数据的下标
         if (index > -1) {
@@ -91,17 +91,6 @@ export default {
   methods: {
     // 上拉加载
     async onLoad () {
-      // if (this.articles.length > 50) {
-      //   this.finished = true
-      // } else {
-      //   const arr = Array.from(
-      //     Array(15),
-      //     (value, index) => this.articles.length + index + 1
-      //   )
-      //   this.articles.push(...arr)
-      //   this.upLoading = false
-      // }
-      // setTimeout(() => (this.finished = true), 1000)
       await this.$sleep() // 人为控制请求时间
       const data = await getArticle({
         channel_id: this.channel_id,

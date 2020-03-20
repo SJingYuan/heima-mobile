@@ -2,13 +2,6 @@
   <div class="container">
     <van-tabs v-model="activeIndex">
       <van-tab :title="item.name" v-for="item in channels" :key="item.id">
-        <!-- 这里注意 这个div设置了滚动条 目的是 给后面做 阅读记忆 留下伏笔 -->
-        <!-- 阅读记忆 => 看文章看到一半 滑到中部 去了别的页面 当你回来时 文章还在你看的位置 -->
-        <!-- <div class="scroll-wrapper">
-          <van-cell-group>
-            <van-cell title="标题" value="内容" v-for="item in 20" :key="item"></van-cell>
-          </van-cell-group>
-        </div> -->
         <ArticleList @showMoreAction="openMoreAction" :channel_id="item.id"></ArticleList>
       </van-tab>
     </van-tabs>
@@ -16,7 +9,7 @@
       <van-icon name="wap-nav" />
     </span>
     <van-popup :style="{ width: '80%' }" v-model="showMoreAction">
-      <moreAction @disLike="dislikeArticle"></moreAction>
+       <moreAction @dislike="dislikeOrReport('dislike')" @report="dislikeOrReport('report',$event)" />
     </van-popup>
   </div>
 </template>
@@ -25,7 +18,7 @@
 import ArticleList from './components/article-list'
 import { getMyChannels } from '../../api/channels'
 import moreAction from './components/moreAction'
-import { disLikeArticle } from '@/api/articles'
+import { disLikeArticle, reportArticle } from '@/api/articles'
 import eventbus from '../../utils/eventbus' // 公共事件處理器
 export default {
   name: 'home',
@@ -38,7 +31,7 @@ export default {
       channels: [], // 接收频道数据
       showMoreAction: false, // 控制反馈组件显示隐藏
       articleId: null, // 接受点击的文章id
-      activeIndex: null
+      activeIndex: 0
     }
   },
   methods: {
@@ -51,12 +44,10 @@ export default {
       this.channels = data.channels // 赋值给data的channels
     },
     // 对文章不感兴趣
-    async dislikeArticle () {
+    async dislikeOrReport (operateType, type) {
       // 调用不感兴趣的文章接口
       try {
-        await disLikeArticle({
-          target: this.articleId // 不感兴趣的id
-        })
+        operateType === 'dislike' ? await disLikeArticle({ target: this.articleId }) : await reportArticle({ target: this.articleId, type })
         // await下方的逻辑 是 resolve(成功)之后 的
         this.$snotify({
           type: 'success',
