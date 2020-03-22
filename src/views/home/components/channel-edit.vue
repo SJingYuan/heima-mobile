@@ -10,9 +10,9 @@
       </div>
       <!-- 循环选项 -->
       <van-grid class="van-hairline--left">
-        <van-grid-item v-for="(item,i) in channels" :key="item.id">
-          <span class="f12">{{item.name}}</span>
-          <van-icon v-if="i!==0&&editing" class="btn" name="cross"></van-icon>
+        <van-grid-item v-for="(item,index) in channels" :key="item.id">
+          <span  @click="$emit('selectChannel', index)" :class="{red:index===activeIndex}" class="f12">{{item.name}}</span>
+          <van-icon  @click="$emit('delChannel', item.id)"  v-if="index!==0&&editing" class="btn" name="cross"></van-icon>
         </van-grid-item>
       </van-grid>
     </div>
@@ -44,6 +44,11 @@ export default {
       required: true,
       type: Array,
       default: () => []
+    },
+    activeIndex: {
+      required: true,
+      type: Number,
+      default: 0
     }
   },
   methods: {

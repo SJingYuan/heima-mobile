@@ -11,15 +11,15 @@
     <van-popup :style="{ width: '80%' }" v-model="showMoreAction">
       <moreAction @dislike="dislikeOrReport('dislike')" @report="dislikeOrReport('report',$event)" />
     </van-popup>
-    <van-action-sheet :round="false" title="编辑频道" v-model="showChannelEdit">
-      <ChannelEdit :channels="channels"></ChannelEdit>
+     <van-action-sheet :round="false" title="编辑频道" v-model="showChannelEdit">
+      <ChannelEdit @delChannel="delChannel" :activeIndex="activeIndex" @selectChannel="selectChannel" :channels="channels"></ChannelEdit>
     </van-action-sheet>
   </div>
 </template>
 
 <script>
 import ArticleList from './components/article-list'
-import { getMyChannels } from '../../api/channels'
+import { getMyChannels, delChannel } from '../../api/channels'
 import moreAction from './components/moreAction'
 import { disLikeArticle, reportArticle } from '@/api/articles'
 import eventbus from '../../utils/eventbus' // 公共事件處理器
@@ -41,6 +41,27 @@ export default {
     }
   },
   methods: {
+    async delChannel (id) {
+      try {
+        await delChannel(id)
+        const index = this.channels.findIndex(item => item.id === id)
+        if (index <= this.activeIndex) {
+          this.activeIndex = this.activeIndex - 1
+        }
+        this.channels.splice(index, 1)
+      } catch (error) {
+        this.$snotify({ message: '删除频道失败' })
+      }
+    },
+    // selectChannel (id) {
+    //   const index = this.channels.findIndex(item => item.id === id) // 获取索引
+    //   this.activeIndex = index // // 将tabs激活标签切换到对应的标签下
+    //   this.showChannelEdit = false // 关闭弹层
+    // },
+    selectChannel (index) {
+      this.activeIndex = index // // 将tabs激活标签切换到对应的标签下
+      this.showChannelEdit = false // 关闭弹层
+    },
     openMoreAction (artId) {
       this.showMoreAction = true
       this.articleId = artId
