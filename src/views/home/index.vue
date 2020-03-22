@@ -12,14 +12,14 @@
       <moreAction @dislike="dislikeOrReport('dislike')" @report="dislikeOrReport('report',$event)" />
     </van-popup>
      <van-action-sheet :round="false" title="编辑频道" v-model="showChannelEdit">
-      <ChannelEdit @delChannel="delChannel" :activeIndex="activeIndex" @selectChannel="selectChannel" :channels="channels"></ChannelEdit>
+      <ChannelEdit @addChannel="addChannel" @delChannel="delChannel" :activeIndex="activeIndex" @selectChannel="selectChannel" :channels="channels"></ChannelEdit>
     </van-action-sheet>
   </div>
 </template>
 
 <script>
 import ArticleList from './components/article-list'
-import { getMyChannels, delChannel } from '../../api/channels'
+import { getMyChannels, delChannel, addChannel } from '../../api/channels'
 import moreAction from './components/moreAction'
 import { disLikeArticle, reportArticle } from '@/api/articles'
 import eventbus from '../../utils/eventbus' // 公共事件處理器
@@ -41,6 +41,10 @@ export default {
     }
   },
   methods: {
+    async addChannel (channel) {
+      await addChannel(channel)
+      this.channels.push(channel)
+    },
     async delChannel (id) {
       try {
         await delChannel(id)
