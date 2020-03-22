@@ -12,7 +12,7 @@
       <moreAction @dislike="dislikeOrReport('dislike')" @report="dislikeOrReport('report',$event)" />
     </van-popup>
     <van-action-sheet :round="false" title="编辑频道" v-model="showChannelEdit">
-      <ChannelEdit></ChannelEdit>
+      <ChannelEdit :channels="channels"></ChannelEdit>
     </van-action-sheet>
   </div>
 </template>
