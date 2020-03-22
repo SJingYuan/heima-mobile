@@ -5,12 +5,15 @@
         <ArticleList @showMoreAction="openMoreAction" :channel_id="item.id"></ArticleList>
       </van-tab>
     </van-tabs>
-    <span class="bar_btn">
+    <span class="bar_btn" @click="showChannelEdit=true">
       <van-icon name="wap-nav" />
     </span>
     <van-popup :style="{ width: '80%' }" v-model="showMoreAction">
-       <moreAction @dislike="dislikeOrReport('dislike')" @report="dislikeOrReport('report',$event)" />
+      <moreAction @dislike="dislikeOrReport('dislike')" @report="dislikeOrReport('report',$event)" />
     </van-popup>
+    <van-action-sheet :round="false" title="编辑频道" v-model="showChannelEdit">
+      <ChannelEdit></ChannelEdit>
+    </van-action-sheet>
   </div>
 </template>
 
@@ -20,18 +23,21 @@ import { getMyChannels } from '../../api/channels'
 import moreAction from './components/moreAction'
 import { disLikeArticle, reportArticle } from '@/api/articles'
 import eventbus from '../../utils/eventbus' // 公共事件處理器
+import ChannelEdit from './components/channel-edit'
 export default {
   name: 'home',
   components: {
     ArticleList,
-    moreAction
+    moreAction,
+    ChannelEdit
   },
   data () {
     return {
       channels: [], // 接收频道数据
       showMoreAction: false, // 控制反馈组件显示隐藏
       articleId: null, // 接受点击的文章id
-      activeIndex: 0
+      activeIndex: 0,
+      showChannelEdit: false
     }
   },
   methods: {
@@ -39,7 +45,7 @@ export default {
       this.showMoreAction = true
       this.articleId = artId
     },
-    async  getMyChannels () {
+    async getMyChannels () {
       const data = await getMyChannels() // 接收结果
       this.channels = data.channels // 赋值给data的channels
     },
@@ -47,14 +53,20 @@ export default {
     async dislikeOrReport (operateType, type) {
       // 调用不感兴趣的文章接口
       try {
-        operateType === 'dislike' ? await disLikeArticle({ target: this.articleId }) : await reportArticle({ target: this.articleId, type })
+        operateType === 'dislike'
+          ? await disLikeArticle({ target: this.articleId })
+          : await reportArticle({ target: this.articleId, type })
         // await下方的逻辑 是 resolve(成功)之后 的
         this.$snotify({
           type: 'success',
           message: '操作成功'
         })
 
-        eventbus.$emit('delArtiles', this.articleId, this.channels[this.activeIndex].id)
+        eventbus.$emit(
+          'delArtiles',
+          this.articleId,
+          this.channels[this.activeIndex].id
+        )
         this.showMoreAction = false
       } catch (error) {
         // 默认是红色
@@ -71,6 +83,17 @@ export default {
 </script>
 
 <style lang="less" scoped>
+  .van-action-sheet {
+    max-height: 100%;
+    height: 100%;
+    .van-action-sheet__header {
+      background: #3296fa;
+      color: #fff;
+      .van-icon-close {
+        color: #fff;
+      }
+    }
+  }
 .van-tabs {
   height: 100%;
   display: flex;
