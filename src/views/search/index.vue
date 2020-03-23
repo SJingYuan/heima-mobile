@@ -5,9 +5,7 @@
     <!-- 导航 -->
     <van-search @search="onSearch" v-model.trim="q" placeholder="请输入搜索关键词" shape="round" />
     <van-cell-group class="suggest-box" v-if="q">
-      <van-cell icon="search">
-        <span>j</span>ava
-      </van-cell>
+      <van-cell @click="toResult(item)" v-for="(item,index)  in suggestList" :key="index" icon="search">{{item}}</van-cell>
     </van-cell-group>
     <div class="history-box" v-if="!q">
       <div class="head" v-if="historyList.length">
@@ -30,16 +28,54 @@
 </template>
 
 <script>
+import { suggestion } from '@/api/articles'
 const key = 'heima-history' // 作为历史记录在本地缓存中的key
 export default {
   name: 'search',
   data () {
     return {
       q: '',
-      historyList: JSON.parse(localStorage.getItem(key) || '[]')
+      historyList: JSON.parse(localStorage.getItem(key) || '[]'), // 接受搜索历史
+      suggestList: [] // 联想搜索建议
+    }
+  },
+  watch: {
+    // q () {
+    //   clearTimeout(this.timer)
+    //   this.timer = setTimeout(async () => {
+    //     // 判断清空不发请求，联想搜索清空
+    //     if (!this.q) {
+    //       this.suggestList = []
+    //       return
+    //     }
+    //     const data = await suggestion({ q: this.q })
+    //     this.suggestList = data.options
+    //   }, 300)
+    // }
+    // -------函数节流
+    q () {
+      if (!this.timer) {
+        this.timer = setTimeout(async () => {
+          this.timer = null
+          // 判断清空不发请求，联想搜索清空
+          if (!this.q) {
+            this.suggestList = []
+            return
+          }
+          const data = await suggestion({ q: this.q })
+          this.suggestList = data.options
+        }, 300)
+      }
     }
   },
   methods: {
+    // 跳到结果页
+    toResult (text) {
+      this.historyList.push(text) // 加倒历史记录
+      this.historyList = Array.from(new Set(this.historyList))
+      localStorage.setItem(key, JSON.stringify(this.historyList))
+      this.$router.push({ path: '/search/result', query: { q: text } })
+    },
     // 删除历史
     delHistory (index) {
       this.historyList.splice(index, 1)
