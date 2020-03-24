@@ -7,3 +7,18 @@ export function login (data) {
     data
   })
 }
+/** *关注用户***/
+export function followUser (data) {
+  return request({
+    url: '/user/followings',
+    method: 'post',
+    data
+  })
+}
+/** *取消关注***/
+export function unFollowUser (autid) {
+  return request({
+    method: 'delete',
+    url: `/user/followings/${autid}`
+  })
+}

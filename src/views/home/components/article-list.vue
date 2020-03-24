@@ -10,7 +10,7 @@
         @load="onLoad"
       >
         <van-cell-group>
-          <van-cell v-for="item in articles" :key="item.art_id.toString()">
+          <van-cell :to="`/article?artId=${item.art_id.toString()}`" v-for="item in articles" :key="item.art_id.toString()">
             <!-- 列表 -->
             <!-- 三张图 -->
             <div class="article_item">
@@ -31,7 +31,7 @@
                 <span>{{item.aut_name}}</span>
                 <span>{{ item.comm_count }}评论</span>
                 <span>{{ item.pubdate | relTime }}</span>
-                <span @click="$emit('showMoreAction',item.art_id)" class="close" v-if="user.token">
+                <span @click.stop="$emit('showMoreAction',item.art_id)" class="close" v-if="user.token">
                   <van-icon name="cross"></van-icon>
                 </span>
               </div>
