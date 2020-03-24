@@ -35,6 +35,8 @@
           icon="delete"
         >不喜欢</van-button>
       </div>
+    <!-- 评论 -->
+    <Comment></Comment>
     </div>
     <van-overlay :show="loading">
       <div class="loading-container">
@@ -47,7 +49,11 @@
 <script>
 import { getArticleInfo } from '@/api/articles'
 import { followUser, unFollowUser } from '@/api/user'
+import Comment from './components/comment'
 export default {
+  components: {
+    Comment
+  },
   data () {
     return {
       article: {}, // 接受文章数据
@@ -125,6 +131,7 @@ export default {
     position:sticky;
     background-color: #fff;
     top:46px;
+     z-index: 2;
     .text {
       flex: 1;
       padding-left: 10px;
