@@ -28,3 +28,25 @@ export function getUserInfo () {
     url: '/user'
   })
 }
+// 获取用户个人资料
+export function getUserProfile () {
+  return request({
+    url: '/user/profile'
+  })
+}
+// 编辑用户头像的
+export function updateImg (data) {
+  return request({
+    url: '/user/photo', // 编辑头像的地址
+    method: 'patch', // 设置头像的类型
+    data
+  })
+}
+// 保存用户信息
+export function saveUserInfo (data) {
+  return request({
+    url: '/user/profile', // 编辑资料的地址
+    data: { ...data, photo: null },
+    method: 'patch'
+  })
+}
