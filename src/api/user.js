@@ -22,3 +22,9 @@ export function unFollowUser (autid) {
     url: `/user/followings/${autid}`
   })
 }
+// 获取用户个人信息
+export function getUserInfo () {
+  return request({
+    url: '/user'
+  })
+}
