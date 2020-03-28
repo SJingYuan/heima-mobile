@@ -1,7 +1,7 @@
 <template>
    <div class="container">
     <van-nav-bar fixed left-arrow @click-left="$router.back()" title="小智同学"></van-nav-bar>
-    <div class="chat-list">
+    <div class="chat-list" ref="myList">
       <div class="chat-item" :class="{left:item.name==='xz',right:item.name!=='xz'}" v-for="(item,index) in list" :key="index">
         <van-image v-if="item.name=='xz'" fit="cover" round :src="XZImg" />
         <div class="chat-pao">{{item.msg}}</div>
@@ -44,9 +44,15 @@ export default {
     })
     this.socket.on('message', data => {
       this.list.push({ ...data, name: 'xz' })
+      this.scrollBottom()
     })
   },
   methods: {
+    scrollBottom () {
+      this.$nextTick(() => {
+        this.$refs.myList.scrollTop = this.$refs.myList.scrollHeight
+      })
+    },
     // 发送消息
     async send () {
       if (!this.value) return false
@@ -60,7 +66,11 @@ export default {
       this.list.push(obj)
       this.value = ''
       this.loading = false
+      this.scrollBottom()
     }
+  },
+  beforeDestroy () {
+    this.socket.close()
   }
 }
 </script>
