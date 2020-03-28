@@ -2,17 +2,14 @@
    <div class="container">
     <van-nav-bar fixed left-arrow @click-left="$router.back()" title="小智同学"></van-nav-bar>
     <div class="chat-list">
-      <div class="chat-item left">
-        <van-image fit="cover" round src="https://img.yzcdn.cn/vant/cat.jpeg" />
-        <div class="chat-pao">ewqewq</div>
-      </div>
-      <div class="chat-item right">
-        <div class="chat-pao">ewqewq</div>
-        <van-image  fit="cover" round src="https://img.yzcdn.cn/vant/cat.jpeg" />
+      <div class="chat-item" :class="{left:item.name==='xz',right:item.name!=='xz'}" v-for="(item,index) in list" :key="index">
+        <van-image v-if="item.name=='xz'" fit="cover" round :src="XZImg" />
+        <div class="chat-pao">{{item.msg}}</div>
+        <van-image v-if="item.name!=='xz'"  fit="cover" round :src="photo" />
       </div>
     </div>
     <div class="reply-container van-hairline--top">
-      <van-field v-model="value" placeholder="说点什么...">
+      <van-field v-model.trim="value" placeholder="说点什么...">
         <van-loading v-if="loading" slot="button" type="spinner" size="16px"></van-loading>
         <span v-else @click="send()" slot="button" style="font-size:12px;color:#999">提交</span>
       </van-field>
@@ -21,8 +18,50 @@
 </template>
 
 <script>
+import XZImg from '@/assets/images/xz.png'
+import { mapState } from 'vuex'
+import io from 'socket.io-client'
 export default {
-
+  data () {
+    return {
+      XZImg,
+      list: [],
+      loading: false,
+      value: ''
+    }
+  },
+  computed: {
+    ...mapState(['photo', 'user'])
+  },
+  created () {
+    this.socket = io('http://ttapi.research.itcast.cn', {
+      query: {
+        token: this.user.token
+      }
+    })
+    this.socket.on('connect', () => {
+      this.list.push({ msg: '拉拉拉拉', name: 'xz' })
+    })
+    this.socket.on('message', data => {
+      this.list.push({ ...data, name: 'xz' })
+    })
+  },
+  methods: {
+    // 发送消息
+    async send () {
+      if (!this.value) return false
+      this.loading = true
+      await this.$sleep()
+      const obj = {
+        msg: this.value,
+        timestamp: Date.now()
+      }
+      this.socket.emit('message', obj)
+      this.list.push(obj)
+      this.value = ''
+      this.loading = false
+    }
+  }
 }
 </script>
 
