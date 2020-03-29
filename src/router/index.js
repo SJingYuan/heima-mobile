@@ -22,7 +22,8 @@ const routes = [
     component: Layout, // 一级路由
     children: [{
       path: '',
-      component: home // 二级，首页
+      component: home, // 二级，首页
+      meta: { isAlive: true } // 是否缓存组件实例
     },
     {
       path: '/question',

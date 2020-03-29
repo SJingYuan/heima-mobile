@@ -1,6 +1,6 @@
 <template>
   <!-- 阅读记忆 => 看文章看到一半 滑到中部 去了别的页面 当你回来时 文章还在你看的位置 -->
-  <div class="scroll-wrapper">
+  <div ref="myScroll" class="scroll-wrapper" @scroll="remember">
     <van-pull-refresh :success-text="successText" v-model="downLoading" @refresh="onRefresh">
       <van-list
         finished-text="没有了"
@@ -66,6 +66,15 @@ export default {
         }
       }
     })
+    eventBus.$on('changeTab', (id) => {
+      if (id === this.channel_id) {
+        this.$nextTick(() => {
+          if (this.scrollTop && this.$refs.myScroll) {
+            this.$refs.myScroll.scrollTop = this.scrollTop
+          }
+        })
+      }
+    })
   },
   computed: {
     ...mapState(['user']) // 映射到计算属性
@@ -78,7 +87,8 @@ export default {
       upLoading: false, // 是否上拉加载数据
       finished: false, // 加载是否完成
       articles: [], // 文章列表
-      timestamp: null // 历史时间戳
+      timestamp: null, // 历史时间戳
+      scrollTop: 0
     }
   },
   props: {
@@ -89,6 +99,12 @@ export default {
     }
   },
   methods: {
+    remember (event) {
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => {
+        this.scrollTop = event.target.scrollTop
+      }, 500)
+    },
     // 上拉加载
     async onLoad () {
       await this.$sleep() // 人为控制请求时间
@@ -135,10 +151,14 @@ export default {
       //   this.successText = `更新了${arr.length}条数据`
       // }, 1000)
     }
+  },
+  activated () {
+    if (this.$refs.myScroll && this.scrollTop) {
+      this.$refs.myScroll.scrollTop = this.scrollTop
+    }
   }
 }
 </script>
- /user/channels
 <style lang='less' scoped>
 .article_item {
   h3 {
